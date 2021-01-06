@@ -1,0 +1,6 @@
+__pycache__
+*.ply
+.git/
+.idea/
+*.pdf
+input/
