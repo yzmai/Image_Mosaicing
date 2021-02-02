@@ -38,27 +38,30 @@ class GenerateMosaic:
 
             # Run RANSAC to remove outliers
             ransac_obj = RANSAC()
-            inliers_cnt, inliers, outliers, sample_pts, final_H = ransac_obj.run_ransac(correspondence)
+            try:
+                inliers_cnt, inliers, outliers, sample_pts, final_H = ransac_obj.run_ransac(correspondence)
 
+                result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + '_inliers.jpg')
+                ransac_obj.draw_lines(np.concatenate((inliers, sample_pts), axis=0), siftmatch_obj.img_1_bgr,
+                                      siftmatch_obj.img_2_bgr, result_path,
+                                      line_color=RANSAC._GREEN, pt_color=[0, 0, 0])
 
-            result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + '_inliers.jpg')
-            ransac_obj.draw_lines(np.concatenate((inliers, sample_pts), axis=0), siftmatch_obj.img_1_bgr,
-                                  siftmatch_obj.img_2_bgr, result_path,
-                                  line_color=RANSAC._GREEN, pt_color=[0, 0, 0])
+                result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + 'outliers.jpg')
+                ransac_obj.draw_lines(outliers, siftmatch_obj.img_1_bgr, siftmatch_obj.img_2_bgr, result_path,
+                                      line_color=RANSAC._RED, pt_color=[0, 0, 0])
 
-            result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + 'outliers.jpg')
-            ransac_obj.draw_lines(outliers, siftmatch_obj.img_1_bgr, siftmatch_obj.img_2_bgr, result_path,
-                                  line_color=RANSAC._RED, pt_color=[0, 0, 0])
+                # Optimize the homography using Levenberg-Marquardt optimization
+                x = np.concatenate((inliers, sample_pts), axis=0)
+                opt_obj = OptimizeFunction(fun=fun_LM_homography, x0=final_H.flatten(), jac=jac_LM_homography,
+                                           args=(x[:, 0:2], x[:, 2:]))
+                LM_sol = opt_obj.levenberg_marquardt(delta_thresh=1e-24, tau=0.8)
 
-            # Optimize the homography using Levenberg-Marquardt optimization
-            x = np.concatenate((inliers, sample_pts), axis=0)
-            opt_obj = OptimizeFunction(fun=fun_LM_homography, x0=final_H.flatten(), jac=jac_LM_homography,
-                                       args=(x[:, 0:2], x[:, 2:]))
-            LM_sol = opt_obj.levenberg_marquardt(delta_thresh=1e-24, tau=0.8)
+                H_all[key] = LM_sol.x.reshape(3, 3)
+                H_all[key] = H_all[key] / H_all[key][-1, -1]
 
-            H_all[key] = LM_sol.x.reshape(3, 3)
-            H_all[key] = H_all[key] / H_all[key][-1, -1]
-
+            except:
+                print(" #### Image Mosaicing error & fails {} & {} ######".format(self.img_name_list[i], self.img_name_list[i + 1]))
+                continue
 
             # sol = optimize.least_squares(fun_LM_homography, final_H.flatten(), args=(x[:, 0:2], x[:, 2:]), method='lm', jac=jac_LM_homography,
             #                              xtol=1e-24, ftol=1e-24)
@@ -190,10 +193,18 @@ class GenerateMosaic:
             key = "H{}{}".format(i, self.middle_id)  # H02
             j = i
             temp = np.eye(3)
+
+            keynotFound = False
             while j < self.middle_id:
                 key_t = "H{}{}".format(j, j+1)
+                if key_t not in list(H_all.keys()):
+                    keynotFound = True
+                    break
                 temp = np.matmul(H_all[key_t], temp)
                 j += 1
+
+            if keynotFound == True:
+                continue
 
             H_all[key] = temp
 
@@ -207,10 +218,17 @@ class GenerateMosaic:
 
             j = i-1
 
+            keynotFound = False
             while j >= self.middle_id:
                 key_t = "H{}{}".format(j, j+1)
+                if key_t not in list(H_all.keys()):
+                    keynotFound = True
+                    break
                 temp = np.matmul(np.linalg.inv(H_all[key_t]), temp)
                 j -= 1
+
+            if keynotFound == True:
+                continue
 
             H_all[key] = temp
 
@@ -223,10 +241,27 @@ if __name__ == "__main__":
     img_name_list = os.listdir(parent_folder)
     img_name_list = [img_name_list[id] for id in range(len(img_name_list)) if img_name_list[id].endswith('pg')]
 
+    #不能随机采样，否则乱了
+    MAX_IMAGE_NUMBER = 400
+
     image_ids = []
     for imageId in range(len(img_name_list)):
         image_ids = image_ids + [int(s) for s in re.findall(r'\d+', img_name_list[imageId])]
     img_name_list = [img_name_list[id] for id in np.argsort(image_ids).tolist()]
+
+    sampleTimes = np.ceil(len(img_name_list) / MAX_IMAGE_NUMBER)
+
+    Ids_touse = []
+    Ids_tbd = []
+    for imageId in range(len(img_name_list)):
+        if (imageId % sampleTimes != 0) & (imageId != len(img_name_list) - 1):
+            Ids_tbd = Ids_tbd + [imageId]
+        else:
+            Ids_touse = Ids_touse + [imageId]
+
+    Ids_touse = Ids_touse + np.random.choice(Ids_tbd, size=MAX_IMAGE_NUMBER - len(Ids_touse), replace=False).tolist()
+    Ids_touse = np.sort(Ids_touse)
+    img_name_list = [img_name_list[id] for id in np.argsort(Ids_touse).tolist()]
 
     obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list)
     obj.mosaic()

@@ -51,9 +51,9 @@ def get_pixel_coord(mask):
     :return:
     """
     y, x = np.where(mask)
-    print("\n x.size : ", x.size)
+    # print("\n x.size : ", x.size)
     pts = np.concatenate((x[:,np.newaxis], y[:, np.newaxis], np.ones((x.size, 1))), axis=1) # rows of [x1, y1, 1]
-    print(pts)
+    # print(pts)
 
     return pts
 
@@ -130,9 +130,9 @@ def get_pixel_val(img_dst, img_src, pts, out_src, offset):
     tl = tl[r_ce[0], :]
     br = br[r_ce[0], :]
 
-    print(pts.shape)
-    print(out_src.shape)
-    print(tl.shape)
+    # print(pts.shape)
+    # print(out_src.shape)
+    # print(tl.shape)
     print(br.shape)
 
     tr = np.concatenate((tl[:, 0:1], br[:, 1:2]), axis=1)

@@ -1,5 +1,5 @@
-from ransac_angle import *
-from match_features import *
+from ransac_angle_fast import *
+from match_features_fast import *
 from scipy import optimize
 from optimize_fcn import *
 import re
@@ -41,14 +41,14 @@ class GenerateMosaic:
             try:
                 inliers_cnt, inliers, outliers, sample_pts, final_H = ransac_obj.run_ransac(correspondence)
 
-                result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + '_inliers.jpg')
-                ransac_obj.draw_lines(np.concatenate((inliers, sample_pts), axis=0), siftmatch_obj.img_1_bgr,
-                                      siftmatch_obj.img_2_bgr, result_path,
-                                      line_color=RANSAC._GREEN, pt_color=[0, 0, 0])
-
-                result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + 'outliers.jpg')
-                ransac_obj.draw_lines(outliers, siftmatch_obj.img_1_bgr, siftmatch_obj.img_2_bgr, result_path,
-                                      line_color=RANSAC._RED, pt_color=[0, 0, 0])
+                # result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + '_inliers.jpg')
+                # ransac_obj.draw_lines(np.concatenate((inliers, sample_pts), axis=0), siftmatch_obj.img_1_bgr,
+                #                       siftmatch_obj.img_2_bgr, result_path,
+                #                       line_color=RANSAC._GREEN, pt_color=[0, 0, 0])
+                #
+                # result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + 'outliers.jpg')
+                # ransac_obj.draw_lines(outliers, siftmatch_obj.img_1_bgr, siftmatch_obj.img_2_bgr, result_path,
+                #                       line_color=RANSAC._RED, pt_color=[0, 0, 0])
 
                 # Optimize the homography using Levenberg-Marquardt optimization
                 x = np.concatenate((inliers, sample_pts), axis=0)
@@ -103,9 +103,9 @@ class GenerateMosaic:
             # pts_in_img_2 = H * pts_in_canvas
             mask[np.where(canvas_img)[0:2]] = 0
 
-            result_path = os.path.join(result_fldr, 'panorama_{}.jpg'.format(i))
-            cv2.imwrite(result_path, canvas_img[:, :, (2, 1, 0)])
-
+            if i == len(self.img_name_list)-1:
+                result_path = os.path.join(result_fldr, 'panorama_{}.jpg'.format(i))
+                cv2.imwrite(result_path, canvas_img[:, :, (2, 1, 0)])
 
 
 

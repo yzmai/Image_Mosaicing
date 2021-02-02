@@ -1,4 +1,4 @@
-from estimate_homography import *
+from estimate_homography_fast import *
 import numpy as np
 
 
@@ -135,8 +135,8 @@ class RANSAC:
 
             inlier_count = inliers.shape[0]
 
-            print("prev_inlier_cnt: {}, new_inlier_cnt: {}".
-                  format(current_inliers_cnt, inlier_count))
+            # print("prev_inlier_cnt: {}, new_inlier_cnt: {}".
+            #       format(current_inliers_cnt, inlier_count))
 
             if (inlier_count > 2) and (inlier_count > current_inliers_cnt):
             # if (inlier_count > self.M) and (inlier_count > current_inliers_cnt):
@@ -146,7 +146,11 @@ class RANSAC:
                 current_inliers_cnt = inlier_count
                 current_sample_pts = sample_pts
 
-            print(" Done {}/{}".format(no_iter, self.N))
+                if inlier_count > 50:
+                    print(" #### break when no_iter:{}, inlier_count:{}", no_iter, inlier_count)
+                    break
+
+            # print(" Done {}/{}".format(no_iter, self.N))
 
             no_iter += 1
 

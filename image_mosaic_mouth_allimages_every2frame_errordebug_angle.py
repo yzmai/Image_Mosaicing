@@ -225,6 +225,6 @@ if __name__ == "__main__":
         image_ids = image_ids + [int(s) for s in re.findall(r'\d+', img_name_list[imageId])]
     img_name_list = [img_name_list[id] for id in np.argsort(image_ids).tolist()]
 
-    img_name_list=['mouth_344.jpg', 'mouth_346.jpg']
+    img_name_list=['mouth_340.jpg', 'mouth_350.jpg']
     obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list)
     obj.mosaic()
