@@ -3,15 +3,17 @@ from match_features_fast import *
 from scipy import optimize
 from optimize_fcn import *
 import re
+import platform
 
 
 class GenerateMosaic:
 
-    def __init__(self, parent_folder, img_name_list):
+    def __init__(self, parent_folder, img_name_list, img_dict):
         self.img_all = {}
         self.parent_folder = parent_folder
         self.img_name_list = img_name_list
         self.middle_id = int(np.floor(len(img_name_list)/2))
+        self.img_dict = img_dict
 
         # # Read all images and store in dictionary
         # for id, img_name in enumerate(img_name_list):
@@ -33,7 +35,7 @@ class GenerateMosaic:
             img_2_path = os.path.join(self.parent_folder, self.img_name_list[i + 1])
 
             # Get SIFT descriptors
-            siftmatch_obj = SiftMatching(img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.6)
+            siftmatch_obj = SiftMatching(self.img_dict, img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.6)
             correspondence = siftmatch_obj.run()
 
             # Run RANSAC to remove outliers
@@ -96,7 +98,8 @@ class GenerateMosaic:
             H = H_all[key]
             img_path = os.path.join(self.parent_folder, img_name)
 
-            img_rgb = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+            # img_rgb = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+            img_rgb = cv2.cvtColor(self.img_dict[img_path], cv2.COLOR_BGR2RGB)
 
             canvas_img = fit_image_in_target_space(img_rgb, canvas_img, mask, np.linalg.inv(H),
                                                    offset=offset)  # the inp to fit_image_in_target_space
@@ -222,14 +225,23 @@ class GenerateMosaic:
 
 
 if __name__ == "__main__":
-    parent_folder = r"D:\Ynby\Git\Image-Mosaicing-master\input\mouth\videomouth2"
+    if platform.system() == 'Windows':
+        parent_folder = r"D:\Ynby\Git\Image-Mosaicing-master\input\mouth\videomouth2"
+    else:
+        parent_folder = r"/data/mouth/videomouth2"
+
     img_name_list = os.listdir(parent_folder)
     img_name_list = [img_name_list[id] for id in range(len(img_name_list)) if img_name_list[id].endswith('pg')]
+
+    img_dict= {}
+    for img_name in img_name_list:
+        img_path = os.path.join(parent_folder, img_name)
+        img_dict[img_path] = cv2.imread(img_path)
 
     image_ids = []
     for imageId in range(len(img_name_list)):
         image_ids = image_ids + [int(s) for s in re.findall(r'\d+', img_name_list[imageId])]
     img_name_list = [img_name_list[id] for id in np.argsort(image_ids).tolist()]
 
-    obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list)
+    obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list, img_dict=img_dict)
     obj.mosaic()

@@ -24,7 +24,7 @@ class SiftMatching:
     _circ_thickness = 2
 
 
-    def __init__(self, img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.8):
+    def __init__(self, img_dict, img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.8):
 
         fname_1 = os.path.basename(img_1_path)
         fname_2 = os.path.basename(img_2_path)
@@ -39,8 +39,10 @@ class SiftMatching:
         if not os.path.exists(self.result_fldr):
             os.makedirs(self.result_fldr)
 
-        self.img_1_bgr = self.read_image(img_1_path)
-        self.img_2_bgr = self.read_image(img_2_path)
+        # self.img_1_bgr = self.read_image(img_1_path)
+        # self.img_2_bgr = self.read_image(img_2_path)
+        self.img_1_bgr = img_dict[img_1_path]
+        self.img_2_bgr = img_dict[img_2_path]
 
         self.nfeatures = nfeatures
         self.gamma = gamma

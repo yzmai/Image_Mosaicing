@@ -121,7 +121,8 @@ class RANSAC:
         current_sample_pts = []
         current_outliers = []
 
-        while no_iter <= self.N:
+        while no_iter <= round(self.N/10):
+        # while no_iter <= self.N:
 
             idx, n_idx = self.sample_n_datapts(n_total, self.n)
 
@@ -146,8 +147,8 @@ class RANSAC:
                 current_inliers_cnt = inlier_count
                 current_sample_pts = sample_pts
 
-                if inlier_count > 50:
-                    print(" #### break when no_iter:{}, inlier_count:{}", no_iter, inlier_count)
+                if inlier_count > 40:
+                    print(" #### break when no_iter:{}, inlier_count:{}".format(no_iter, inlier_count))
                     break
 
             # print(" Done {}/{}".format(no_iter, self.N))
