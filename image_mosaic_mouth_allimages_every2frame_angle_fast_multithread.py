@@ -4,6 +4,7 @@ from scipy import optimize
 from optimize_fcn import *
 import re
 import platform
+import threading
 
 
 class GenerateMosaic:
@@ -14,20 +15,21 @@ class GenerateMosaic:
         self.img_name_list = img_name_list
         self.middle_id = int(np.floor(len(img_name_list)/2))
         self.img_dict = img_dict
+        self.img_id_stack = []
+        for img_id in range(len(self.img_name_list) - 2,-1,-1):
+            self.img_id_stack.append(img_id)
+        self.H_all = {}
 
         # # Read all images and store in dictionary
         # for id, img_name in enumerate(img_name_list):
         #     img_path = os.path.join(parent_fldr, img_name)
         #     self.img_all[id+1] = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
 
-
-
-    def mosaic(self):
-
-        H_all = {}
-        for i in range(len(self.img_name_list) - 1):
+    def siftcal(self, thread_id):
+        print("\nThread : ", thread_id)
+        while len(self.img_id_stack) > 0:
+            i = self.img_id_stack.pop()
             print(" #### Processing {} & {} ######".format(self.img_name_list[i], self.img_name_list[i + 1]))
-
 
             key = 'H{}{}'.format(i, i+1)
 
@@ -58,12 +60,105 @@ class GenerateMosaic:
                                            args=(x[:, 0:2], x[:, 2:]))
                 LM_sol = opt_obj.levenberg_marquardt(delta_thresh=1e-24, tau=0.8)
 
-                H_all[key] = LM_sol.x.reshape(3, 3)
-                H_all[key] = H_all[key] / H_all[key][-1, -1]
+                self.H_all[key] = LM_sol.x.reshape(3, 3)
+                self.H_all[key] = self.H_all[key] / self.H_all[key][-1, -1]
 
             except:
                 print(" #### Image Mosaicing error & fails {} & {} ######".format(self.img_name_list[i], self.img_name_list[i + 1]))
                 continue
+
+
+    def mosaic(self):
+
+        t1 = threading.Thread(target=self.siftcal, args=("t1",))
+        t2 = threading.Thread(target=self.siftcal, args=("t2",))
+        t3 = threading.Thread(target=self.siftcal, args=("t3",))
+        t4 = threading.Thread(target=self.siftcal, args=("t4",))
+        t5 = threading.Thread(target=self.siftcal, args=("t5",))
+        t6 = threading.Thread(target=self.siftcal, args=("t6",))
+        t7 = threading.Thread(target=self.siftcal, args=("t7",))
+        t8 = threading.Thread(target=self.siftcal, args=("t8",))
+        t9 = threading.Thread(target=self.siftcal, args=("t9",))
+        t10 = threading.Thread(target=self.siftcal, args=("t10",))
+        t11 = threading.Thread(target=self.siftcal, args=("t11",))
+        t12 = threading.Thread(target=self.siftcal, args=("t12",))
+        t13 = threading.Thread(target=self.siftcal, args=("t13",))
+        t14 = threading.Thread(target=self.siftcal, args=("t14",))
+        t15 = threading.Thread(target=self.siftcal, args=("t15",))
+        t16 = threading.Thread(target=self.siftcal, args=("t16",))
+        t1.start()
+        t2.start()
+        t3.start()
+        t4.start()
+        t5.start()
+        t6.start()
+        t7.start()
+        t8.start()
+        t9.start()
+        t10.start()
+        t11.start()
+        t12.start()
+        t13.start()
+        t14.start()
+        t15.start()
+        t16.start()
+        t1.join()
+        t2.join()
+        t3.join()
+        t4.join()
+        t5.join()
+        t6.join()
+        t7.join()
+        t8.join()
+        t9.join()
+        t10.join()
+        t11.join()
+        t12.join()
+        t13.join()
+        t14.join()
+        t15.join()
+        t16.join()
+
+        # H_all = {}
+        # for i in range(len(self.img_name_list) - 1):
+        #     print(" #### Processing {} & {} ######".format(self.img_name_list[i], self.img_name_list[i + 1]))
+        #
+        #
+        #     key = 'H{}{}'.format(i, i+1)
+        #
+        #     img_1_path = os.path.join(self.parent_folder, self.img_name_list[i])
+        #     img_2_path = os.path.join(self.parent_folder, self.img_name_list[i + 1])
+        #
+        #     # Get SIFT descriptors
+        #     siftmatch_obj = SiftMatching(self.img_dict, img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.6)
+        #     correspondence = siftmatch_obj.run()
+        #
+        #     # Run RANSAC to remove outliers
+        #     ransac_obj = RANSAC()
+        #     try:
+        #         inliers_cnt, inliers, outliers, sample_pts, final_H = ransac_obj.run_ransac(correspondence)
+        #
+        #         # result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + '_inliers.jpg')
+        #         # ransac_obj.draw_lines(np.concatenate((inliers, sample_pts), axis=0), siftmatch_obj.img_1_bgr,
+        #         #                       siftmatch_obj.img_2_bgr, result_path,
+        #         #                       line_color=RANSAC._GREEN, pt_color=[0, 0, 0])
+        #         #
+        #         # result_path = os.path.join(siftmatch_obj.result_fldr, siftmatch_obj.prefix + 'outliers.jpg')
+        #         # ransac_obj.draw_lines(outliers, siftmatch_obj.img_1_bgr, siftmatch_obj.img_2_bgr, result_path,
+        #         #                       line_color=RANSAC._RED, pt_color=[0, 0, 0])
+        #
+        #         # Optimize the homography using Levenberg-Marquardt optimization
+        #         x = np.concatenate((inliers, sample_pts), axis=0)
+        #         opt_obj = OptimizeFunction(fun=fun_LM_homography, x0=final_H.flatten(), jac=jac_LM_homography,
+        #                                    args=(x[:, 0:2], x[:, 2:]))
+        #         LM_sol = opt_obj.levenberg_marquardt(delta_thresh=1e-24, tau=0.8)
+        #
+        #         H_all[key] = LM_sol.x.reshape(3, 3)
+        #         H_all[key] = H_all[key] / H_all[key][-1, -1]
+        #
+        #     except:
+        #         print(" #### Image Mosaicing error & fails {} & {} ######".format(self.img_name_list[i], self.img_name_list[i + 1]))
+        #         continue
 
             # sol = optimize.least_squares(fun_LM_homography, final_H.flatten(), args=(x[:, 0:2], x[:, 2:]), method='lm', jac=jac_LM_homography,
             #                              xtol=1e-24, ftol=1e-24)
@@ -79,10 +174,12 @@ class GenerateMosaic:
 
             # Hij -> pts_in_img_j = Hij * pts_in_img_i
 
-        print("H_all.keys : ", H_all.keys())
-        H_all = self.compute_H_wrt_middle_img(H_all)
+        print("self.H_all.keys : ", self.H_all.keys())
+        H_all = self.compute_H_wrt_middle_img(self.H_all)
 
-        self.stitch(H_all, siftmatch_obj.result_fldr)
+        result_fldr = os.path.join(self.parent_folder, 'fastresults')
+
+        self.stitch(H_all, result_fldr)
 
 
 
@@ -234,6 +331,7 @@ if __name__ == "__main__":
     img_name_list = os.listdir(parent_folder)
     img_name_list = [img_name_list[id] for id in range(len(img_name_list)) if img_name_list[id].endswith('pg')]
 
+
     img_dict= {}
     for img_name in img_name_list:
         img_path = os.path.join(parent_folder, img_name)
@@ -243,6 +341,7 @@ if __name__ == "__main__":
     for imageId in range(len(img_name_list)):
         image_ids = image_ids + [int(s) for s in re.findall(r'\d+', img_name_list[imageId])]
     img_name_list = [img_name_list[id] for id in np.argsort(image_ids).tolist()]
+    # img_name_list = ['mouth_1.jpg', 'mouth_2.jpg']
 
     obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list, img_dict=img_dict)
     obj.mosaic()
