@@ -6,6 +6,7 @@ import re
 import platform
 import threading
 import math
+import image_mosaic_mouth_allimages_every2frame_angle_fast_func as mosaic_fast
 
 
 class GenerateMosaic:
@@ -172,7 +173,7 @@ class GenerateMosaic:
         sub_canvas_img_list = dict()
         sub_img_length = math.ceil(len(self.img_name_list) / THREAD_NUM)
         for threadId in range(THREAD_NUM):
-            sub_img_name_list = self.img_name_list[(sub_img_length*threadId) : min(sub_img_length*(threadId+1), len(self.img_name_list))]
+            sub_img_name_list = self.img_name_list[(sub_img_length*threadId) : min(sub_img_length*(threadId+2), len(self.img_name_list))]
             canvas_img, mask, offset = self.get_sub_blank_canvas(H_all, sub_img_name_list, sub_img_length*threadId)
             self.canvas_img[threadId] = canvas_img
             self.mask[threadId] = mask
@@ -183,10 +184,16 @@ class GenerateMosaic:
         for threadId in range(THREAD_NUM):
             sub_canvas_img_list[threadId].join()
 
+        panorama_thread_images = []
+        panorama_img_dict = dict()
         for threadId in range(THREAD_NUM):
             result_path = os.path.join(result_fldr, 'panorama_thread_{}.jpg'.format(threadId))
             cv2.imwrite(result_path, self.canvas_img[threadId][:, :, (2, 1, 0)])
+            panorama_thread_images.append('panorama_thread_{}.jpg'.format(threadId))
+            panorama_img_dict[result_path] = self.canvas_img[threadId][:, :, (2, 1, 0)]
 
+        # obj = mosaic_fast.GenerateMosaic(parent_folder=result_fldr , img_name_list=panorama_thread_images, img_dict=panorama_img_dict)
+        # obj.mosaic()
 
 
 
