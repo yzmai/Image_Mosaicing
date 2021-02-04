@@ -70,7 +70,7 @@ class GenerateMosaic:
 
     def mosaic(self):
 
-        THREAD_NUM = 16
+        THREAD_NUM = 48
         sift_list = dict()
         for threadId in range(THREAD_NUM):
             sift_list[threadId] = threading.Thread(target=self.siftcal, args=(threadId, ))
