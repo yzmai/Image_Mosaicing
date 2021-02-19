@@ -18,6 +18,8 @@ if sys.getdefaultencoding() != 'utf-8':
 
 BleedShock_Df=pd.read_excel(r'D:\Ynby\Doc\Demo/出血性休克数据11.24_列名去空格.xlsx')
 
+BleedShock_Df.rename(columns= {'手术部位腹部手术=1，胸部手术=2，骨科手术=3，颅脑手术=4，大血管手术=5，周围血管手术=6，颌面部7' : "手术部位"}, inplace=True)
+
 #去除重复列
 for colId in range(BleedShock_Df.shape[1]-1, -1, -1):
     if type(BleedShock_Df.columns.values[colId]) == type('s'):
@@ -51,6 +53,7 @@ for colId in range(len(BleedShock_Df.columns)):
     if BleedShock_Df.dtypes[colId] == np.dtype('float64'):
         float64colIds = float64colIds + [colId]
         float64colNamess = float64colNamess + [BleedShock_Df.columns[colId]]
+        BleedShock_Df[BleedShock_Df.columns[colId]] = np.round(BleedShock_Df[BleedShock_Df.columns[colId]], 1)
         print(colId, BleedShock_Df.columns[colId], BleedShock_Df.dtypes[colId])
 
 objectcolIds = []
@@ -62,6 +65,8 @@ for colId in range(len(BleedShock_Df.columns)):
         print(colId, BleedShock_Df.columns[colId], BleedShock_Df.dtypes[colId])
 
 shouldBeStrColNames = [eachColName.replace(" ", "") for eachColName in ['病史ID', '性别', '出院诊断', '主诉', '现病史', '主要出血部位', '手术名称', '血管活性药物去甲肾上腺素1、多巴胺2、肾上腺素3、间羟胺4、异丙肾5', '感染部位']]
+# shouldBeFloatColNames = [eachColName.replace(" ", "") for eachColName in ['入院第7天白细胞计数']]
+
 
 YesNoColNames = ['抗凝药及抗血小板药史', '当前吸烟', '当前饮酒', '过敏史']
 for eachcolId in range(len(YesNoColNames)):
@@ -103,6 +108,12 @@ BleedShock_Df.to_excel(r'D:\Ynby\Doc\Demo/出血性休克数据_清洗干净.xls
 import re
 pattern = r' |,|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|@|#|\$|%|\^|&|\(|\)|-|=|\_|\+|，|。|、|；|‘|（|）'
 
+sexCol = BleedShock_Df['性别']
+sexcolId = np.where(BleedShock_Df.columns == '性别')[0][0]
+BleedShock_Df.iloc[[rowId for rowId in np.where(sexCol == '男')[0]], sexcolId] = 1
+BleedShock_Df.iloc[[rowId for rowId in np.where(sexCol == '女')[0]], sexcolId] = 2
+
+
 toBeCategorizedColnames = ['主要出血部位', '手术名称', '血管活性药物去甲肾上腺素1、多巴胺2、肾上腺素3、间羟胺4、异丙肾5', '感染部位']
 for eachcolname in toBeCategorizedColnames:
     BleedParts = []
@@ -139,8 +150,10 @@ for rowId in range(len(BleedShock_Df)):
     elif BleedShock_Df['出院转归'][rowId] == "死亡":
         BleedShock_Df.iloc[rowId, colId] = 2
 
-BleedShock_Df.to_csv(r'D:\Ynby\Doc\Demo/出血性休克数据_清洗干净_分类.csv', encoding="UTF-8", na_rep="", index=False)
-BleedShock_Df.to_excel(r'D:\Ynby\Doc\Demo/出血性休克数据_清洗干净_分类.xlsx', encoding="UTF-8", na_rep="", index=False)
+BleedShock_Df = BleedShock_Df.replace(np.nan, '', regex=True)
+
+BleedShock_Df.to_csv(r'D:\Ynby\Doc\Demo/出血性休克数据_清洗干净_分类.csv', encoding="UTF-8", na_rep='', index=False)
+BleedShock_Df.to_excel(r'D:\Ynby\Doc\Demo/出血性休克数据_清洗干净_分类.xlsx', encoding="UTF-8", na_rep='', index=False)
 
 
 
