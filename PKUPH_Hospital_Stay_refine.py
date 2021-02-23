@@ -448,3 +448,5 @@ all_death_year_ztest_p.sort_values(by='死亡率p值', ascending=True, inplace=T
 all_staydays_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_入院科室2014到2019变化z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 all_death_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_入院科室2014到2019变化z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
+
+
