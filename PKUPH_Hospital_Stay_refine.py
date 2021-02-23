@@ -16,6 +16,10 @@ import PKUPH_Calendar as calendar
 import datetime
 import scipy
 import statsmodels.stats.weightstats as sw
+import matplotlib.pyplot as plt
+from matplotlib import font_manager
+
+zhfont1 = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=20)
 
 if sys.getdefaultencoding() != 'utf-8':
     reload(sys)
@@ -24,9 +28,10 @@ if sys.getdefaultencoding() != 'utf-8':
 
 parent_folder = r'D:\Ynby\Doc\Demo\王储final'
 hospital_in_list = os.listdir(parent_folder)
-
 calendarData = calendar.get_all_calendar()
-holidayDict = {'工作日非周末' : 0, '工作日周末' : 1, '休息日周末' : 2, '休息日节假日' : 3}
+newcalendarData = calendar.get_all_calendar()
+holidayDict = {'工作日非周末' : 0, '工作日周末' : 1, '休息日周末' : 2, '法定假日及连休周末' : 3}
+# newholidayDict = {'工作日非周末' : 0, '工作日周末' : 1, '一般周末' : 2, '两天以内法定假' : 3, '三天以上连休' : 4}
 # holidayDict = {'weekday' : 0, 'workingweekend' : 1, 'normalweekend' : 2, 'holiday' : 3}
 calendarData['工作日周末节假'] = np.nan
 calendarData['工作日周末节假'].iloc[list(set.intersection(set(np.where(calendarData['status'] == 1)[0]), set(np.where(calendarData['isholiday'] == 'Y')[0])))] = 3
@@ -35,6 +40,18 @@ calendarData['工作日周末节假'].iloc[list(set.intersection(set(np.where(ca
 calendarData['工作日周末节假'].iloc[list(set.intersection(set(np.where(calendarData['status'] == 0)[0]), set(np.where(calendarData['isholiday'] == 'N')[0])))] = 0
 calendarData['工作日周末节假'] = calendarData['工作日周末节假'].astype(np.int16)
 calendarData['date'] = [datetime.datetime.strftime(eachstr, "%Y-%m-%d") for eachstr in calendarData['date']]
+colId = np.where(calendarData.columns == '工作日周末节假')[0][0]
+for dateId in range(len(calendarData)):
+    if dateId+2 >= len(calendarData):
+        continue
+    if (calendarData['工作日周末节假'].iloc[dateId] == 2) & (calendarData['工作日周末节假'].iloc[dateId+1] == 2) & (calendarData['工作日周末节假'].iloc[dateId+2] == 3):
+        calendarData.iloc[dateId, colId] = 3
+        calendarData.iloc[dateId+1, colId] = 3
+    if (calendarData['工作日周末节假'].iloc[dateId] == 3) & (calendarData['工作日周末节假'].iloc[dateId+1] == 2) & (calendarData['工作日周末节假'].iloc[dateId+2] == 2):
+        calendarData.iloc[dateId+1, colId] = 3
+        calendarData.iloc[dateId+2, colId] = 3
+
+calendarData.to_excel(r'D:\Ynby\Doc\Demo/calendarData.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 calendarData_in = calendarData.rename(columns = {'date' : '入院Date', '工作日周末节假' : '入院工作日周末节假'})
 calendarData_out = calendarData.rename(columns = {'date' : '出院Date', '工作日周末节假' : '出院工作日周末节假'})
@@ -93,8 +110,39 @@ for filename in hospital_in_list:
 
 yearmonthlyMergedSheet = allMergedSheet.groupby('入院年月').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 yearmonthlyMergedSheet['死亡率'] = yearmonthlyMergedSheet['是否死亡'] / yearmonthlyMergedSheet['患者编号']
+yearmonthlyMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院年月统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+
+
+fig, ax = plt.subplots()
+ax.set_xticks([0, 5, 5+12, 5+24, 5+36, 5+48, 5+54], minor=False)
+ax.xaxis.grid(True, which='major', linewidth=2)
+plt.plot(list(range(len(yearmonthlyMergedSheet.index))), yearmonthlyMergedSheet['住院天数'].values,'-*')
+plt.title(u'2014-2019每月平均住院天数', fontproperties=zhfont1)
+plt.xlabel('年月', fontproperties=zhfont1)
+plt.ylabel('住院天数', fontproperties=zhfont1)
+plt.legend(prop=zhfont1)
+plt.xticks([0, 5, 5+12, 5+24, 5+36, 5+48, 5+54],('201408', '201501', '201601', '201701', '201801', '201901', '201907'), rotation=70)
+plt.savefig(r'D:\Ynby\Doc\Demo/2014-2019每月平均住院天数.jpg')
+plt.show()
+
+#设置横纵坐标的名称以及对应字体格式
+font2 = {'family' : 'Times New Roman', 'weight' : 'normal', 'size' : 30}
+fig, ax = plt.subplots()
+ax.set_xticks([0, 5, 5+12, 5+24, 5+36, 5+48, 5+54], minor=False)
+ax.xaxis.grid(True, which='major', linewidth=2)
+plt.plot(list(range(len(yearmonthlyMergedSheet.index))), yearmonthlyMergedSheet['死亡率'].values,'-*')
+plt.title(u'2014-2019每月死亡率', fontproperties=zhfont1)
+plt.xlabel('年月', fontproperties=zhfont1)
+plt.ylabel('死亡率', fontproperties=zhfont1)
+plt.xticks([0, 5, 5+12, 5+24, 5+36, 5+48, 5+54],('201408', '201501', '201601', '201701', '201801', '201901', '201907'), rotation=70)
+plt.savefig(r'D:\Ynby\Doc\Demo/2014-2019每月死亡率.jpg')
+plt.show()
+
+
 yearlyMergedSheet = allMergedSheet.groupby('入院年份').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 yearlyMergedSheet['死亡率'] = yearlyMergedSheet['是否死亡'] / yearlyMergedSheet['患者编号']
+yearlyMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院年份统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+
 yearlyindeptMergedSheet = allMergedSheet.groupby(by=('入院年份', '入院（就诊）科室名称')).agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 yearlyindeptMergedSheet['死亡率'] = yearlyindeptMergedSheet['是否死亡'] / yearlyindeptMergedSheet['患者编号']
 yearlyoutdeptMergedSheet = allMergedSheet.groupby(by=('入院年份', '出院科室名称')).agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
@@ -102,15 +150,22 @@ yearlyoutdeptMergedSheet['死亡率'] = yearlyoutdeptMergedSheet['是否死亡']
 
 monthlyMergedSheet = allMergedSheet.groupby('入院月份').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 monthlyMergedSheet['死亡率'] = monthlyMergedSheet['是否死亡'] / monthlyMergedSheet['患者编号']
+monthlyMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院月度统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+
 weeklyMergedSheet = allMergedSheet.groupby('入院周几').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 weeklyMergedSheet['死亡率'] = weeklyMergedSheet['是否死亡'] / weeklyMergedSheet['患者编号']
+weeklyMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院周几统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+
 hourlyMergedSheet = allMergedSheet.groupby('入院小时').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 hourlyMergedSheet['死亡率'] = hourlyMergedSheet['是否死亡'] / hourlyMergedSheet['患者编号']
 weekdayendholidayMergedSheet = allMergedSheet.groupby('入院工作日周末节假').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 weekdayendholidayMergedSheet['死亡率'] = weekdayendholidayMergedSheet['是否死亡'] / weekdayendholidayMergedSheet['患者编号']
+weekdayendholidayMergedSheet.index = list(holidayDict.keys())
+weekdayendholidayMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院工作日周末节假统计.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 genderMergedSheet = allMergedSheet.groupby('性别').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 genderMergedSheet['死亡率'] = genderMergedSheet['是否死亡'] / genderMergedSheet['患者编号']
+genderMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_性别统计.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 ageMergedSheet = allMergedSheet.groupby('就诊年龄（岁）').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 ageMergedSheet['死亡率'] = ageMergedSheet['是否死亡'] / ageMergedSheet['患者编号']
@@ -119,6 +174,16 @@ ageMergedSheet = ageMergedSheet.sort_values(by='死亡率', ascending=False)
 deptMergedSheet = allMergedSheet.groupby('入院（就诊）科室名称').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 deptMergedSheet['死亡率'] = deptMergedSheet['是否死亡'] / deptMergedSheet['患者编号']
 deptMergedSheet = deptMergedSheet.sort_values(by='死亡率', ascending=False)
+deptMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_科室统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+
+allMergedSheet_onlytopDept = allMergedSheet.iloc[[rowId for rowId in range(len(allMergedSheet)) if allMergedSheet['入院（就诊）科室名称'].iloc[rowId] in all_death_year_ztest_p['科室'].tolist()], :]
+allMergedSheet_2014_onlytopDept = allMergedSheet_onlytopDept[allMergedSheet_onlytopDept['入院年份'] == 2014]
+allMergedSheet_2019_onlytopDept = allMergedSheet_onlytopDept[allMergedSheet_onlytopDept['入院年份'] == 2019]
+allMergedSheet_2014and2019_onlytopDept = pd.concat([allMergedSheet_2014_onlytopDept, allMergedSheet_2019_onlytopDept], axis=0)
+deptMergedSheet_2014and2019 = allMergedSheet_2014and2019_onlytopDept.groupby(('入院（就诊）科室名称', '入院年份')).agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
+deptMergedSheet_2014and2019['死亡率'] = deptMergedSheet_2014and2019['是否死亡'] / deptMergedSheet_2014and2019['患者编号']
+deptMergedSheet_2014and2019.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率高的科室统计2014to2019.xlsx', encoding="UTF-8", na_rep="", index=True)
+
 
 #年份变化
 years = np.unique(allMergedSheet['入院年份'].values)
@@ -154,6 +219,9 @@ death_year_ztest_p = pd.DataFrame(death_year_ztest_p)
 death_year_ztest_p.columns=years
 death_year_ztest_p.index=years
 death_year_ztest_p = pd.DataFrame(np.round(death_year_ztest_p, 5))
+
+staydays_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_按年份z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+death_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_按年份z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 
 #月份变化
@@ -191,6 +259,8 @@ death_month_ztest_p.columns=months
 death_month_ztest_p.index=months
 death_month_ztest_p = pd.DataFrame(np.round(death_month_ztest_p, 5))
 
+staydays_month_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_按自然月z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+death_month_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_按自然月z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 #周几变化
 weekdays = np.unique(allMergedSheet['入院周几'].values)
@@ -228,6 +298,8 @@ death_weekday_ztest_p.columns=WEEKDAYs
 death_weekday_ztest_p.index=WEEKDAYs
 death_weekday_ztest_p = pd.DataFrame(np.round(death_weekday_ztest_p, 5))
 
+staydays_weekday_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_按周几z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+death_weekday_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_按周几z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 #入院工作日周末节假
 weekdayendholidays = np.unique(allMergedSheet['入院工作日周末节假'].values)
@@ -265,6 +337,8 @@ death_weekdayendholiday_ztest_p.columns=WEEKDAYENDHOLIDAYS
 death_weekdayendholiday_ztest_p.index=WEEKDAYENDHOLIDAYS
 death_weekdayendholiday_ztest_p = pd.DataFrame(np.round(death_weekdayendholiday_ztest_p, 5))
 
+staydays_weekdayendholiday_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_按工作日周末节假z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+death_weekdayendholiday_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_按工作日周末节假z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 #性别对比
 genders = ['女性', '男性']
@@ -301,10 +375,76 @@ death_gender_ztest_p.columns=genders
 death_gender_ztest_p.index=genders
 death_gender_ztest_p = pd.DataFrame(np.round(death_gender_ztest_p, 5))
 
+staydays_gender_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_性别z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+death_gender_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_性别z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 
 
-mergedSheet.to_csv(r'D:\Ynby\Doc\Demo/住院数据_已清洗_二分类.csv', encoding="UTF-8", na_rep="", index=False)
-mergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_已清洗_二分类.xlsx', encoding="UTF-8", na_rep="", index=False)
 
+#科室对比
+topdeptMergedSheet = deptMergedSheet[deptMergedSheet['死亡率'] > 0.005]
+depts = np.unique(topdeptMergedSheet.index.values)
+staydays_dept_ztest_mean = np.zeros((len(depts), len(depts)))
+staydays_dept_ztest_p = np.zeros((len(depts), len(depts)))
+death_dept_ztest_mean = np.zeros((len(depts), len(depts)))
+death_dept_ztest_p = np.zeros((len(depts), len(depts)))
+
+all_staydays_year_ztest_p = []
+all_death_year_ztest_p= []
+
+for deptId in range(len(depts)):
+    #年份变化
+    eachDeptMergedSheet = allMergedSheet[allMergedSheet['入院（就诊）科室名称'] == depts[deptId]]
+    years = np.unique(eachDeptMergedSheet['入院年份'])
+    if len(years) < 2019-2014+1:
+        continue
+    years = [2014, 2019]
+
+    staydays_year_ztest_mean = np.zeros((len(years), len(years)))
+    staydays_year_ztest_p = np.zeros((len(years), len(years)))
+    death_year_ztest_mean = np.zeros((len(years), len(years)))
+    death_year_ztest_p = np.zeros((len(years), len(years)))
+
+    for rowyearId in range(len(years)):
+        for colyearId in range(len(years)):
+            list1= eachDeptMergedSheet[eachDeptMergedSheet['入院年份'] == years[rowyearId]]['住院天数'].values
+            list1 = list1[np.isnan(list1) == False]
+            list2= eachDeptMergedSheet[eachDeptMergedSheet['入院年份'] == years[colyearId]]['住院天数'].values
+            list2 = list2[np.isnan(list2) == False]
+            ztest = sw.ztest(list1, list2)
+            staydays_year_ztest_mean[rowyearId, colyearId] = ztest[0]
+            staydays_year_ztest_p[rowyearId, colyearId] = ztest[1]
+
+            list1= eachDeptMergedSheet[eachDeptMergedSheet['入院年份'] == years[rowyearId]]['是否死亡'].values
+            list1 = list1[np.isnan(list1) == False]
+            list2= eachDeptMergedSheet[eachDeptMergedSheet['入院年份'] == years[colyearId]]['是否死亡'].values
+            list2 = list2[np.isnan(list2) == False]
+            ztest = sw.ztest(list1, list2)
+            death_year_ztest_mean[rowyearId, colyearId] = ztest[0]
+            death_year_ztest_p[rowyearId, colyearId] = ztest[1]
+
+
+    staydays_year_ztest_p = pd.DataFrame(staydays_year_ztest_p).iloc[0:1, 1:2]
+    staydays_year_ztest_p['科室'] = depts[deptId]
+    if len(all_staydays_year_ztest_p) != 0:
+        all_staydays_year_ztest_p = pd.concat([all_staydays_year_ztest_p, staydays_year_ztest_p], axis=0)
+    else:
+        all_staydays_year_ztest_p = staydays_year_ztest_p
+
+    death_year_ztest_p = pd.DataFrame(death_year_ztest_p).iloc[0:1, 1:2]
+    death_year_ztest_p = pd.DataFrame(np.round(death_year_ztest_p, 5))
+    death_year_ztest_p['科室'] = depts[deptId]
+    if len(all_death_year_ztest_p) != 0:
+        all_death_year_ztest_p = pd.concat([all_death_year_ztest_p, death_year_ztest_p], axis=0)
+    else:
+        all_death_year_ztest_p = death_year_ztest_p
+
+all_staydays_year_ztest_p.rename(columns={1: '住院天数p值'}, inplace=True)
+all_staydays_year_ztest_p.sort_values(by='住院天数p值', ascending=True, inplace=True)
+all_death_year_ztest_p.rename(columns={1: '死亡率p值'}, inplace=True)
+all_death_year_ztest_p.sort_values(by='死亡率p值', ascending=True, inplace=True)
+
+
+all_staydays_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_住院天数_入院科室2014到2019变化z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
+all_death_year_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_入院科室2014到2019变化z检验的p值.xlsx', encoding="UTF-8", na_rep="", index=True)
 
