@@ -5,6 +5,7 @@ Created on Mon Jun  8 17:18:15 2020
 @author: 西湖味精三月鲜
 """
 # https://blog.csdn.net/u012735708/article/details/82460962
+# https://www.itbook5.com/2019/08/11560/
 
 import threading
 import time
@@ -94,7 +95,6 @@ def decompose(timeseries):
 
 yearmonthlyData['入院年月'] = [(str(eachstr)[0:4]+"-"+str(eachstr)[4:]) for eachstr in yearmonthlyData['入院年月'].values]
 yearmonthlyData.index = pd.to_datetime(yearmonthlyData['入院年月'])
-
 
 ts = yearmonthlyData['住院天数']
 draw_trend(ts,12)
