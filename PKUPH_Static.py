@@ -6,6 +6,7 @@ Created on Mon Jun  8 17:18:15 2020
 """
 # https://blog.csdn.net/u012735708/article/details/82460962
 # https://www.itbook5.com/2019/08/11560/
+# Augmented Dickey-Fuller
 
 import threading
 import time
