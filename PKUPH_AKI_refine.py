@@ -135,6 +135,35 @@ shouldBeDateColNames = [eachColName.replace(" ", "") for eachColName in ['入ICU
 
 #分类型变量数字化
 
+#入ICU第1~7天（即刻）-肾替代治疗（1/0）， 合并为1列，只要有1个1，就是1
+allTouxiColumns = [str for str in AKI_Df.columns.values if str.find('肾替代治疗') > 0 ]
+AKI_Df['肾替代治疗（1/0）'] = np.nan
+colId = np.where(AKI_Df.columns == '肾替代治疗（1/0）')[0][0]
+for rowId in range(len(AKI_Df)):
+    for eachcolId in allTouxiColumns:
+        found = False
+        if AKI_Df[eachcolId].iloc[rowId] == 1:
+            flagvalue = 1
+            found = True
+            break
+        elif AKI_Df[eachcolId].iloc[rowId] == 0:
+            flagvalue = 0
+            found = True
+
+    if found == True:
+        AKI_Df.iloc[rowId, colId] = flagvalue
+
+
+    if np.isnan(AKI_Df['逆转时间'][rowId]) == False:
+        AKI_Df.iloc[rowId, colId] = 0
+    elif AKI_Df['复发恢复'][rowId] == 1:
+        AKI_Df.iloc[rowId, colId] = 1
+    elif AKI_Df['复发未恢复'][rowId] == 1:
+        AKI_Df.iloc[rowId, colId] = 2
+    elif AKI_Df['未恢复'][rowId] == 1:
+        AKI_Df.iloc[rowId, colId] = 3
+
+
 DiagnoseTypes = []
 import re
 pattern = r' |,|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|@|#|\$|%|\^|&|\(|\)|-|=|\_|\+|，|。|、|；|‘|（|）'
