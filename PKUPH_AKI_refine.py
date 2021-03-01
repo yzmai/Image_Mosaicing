@@ -154,16 +154,6 @@ for rowId in range(len(AKI_Df)):
         AKI_Df.iloc[rowId, colId] = flagvalue
 
 
-    if np.isnan(AKI_Df['逆转时间'][rowId]) == False:
-        AKI_Df.iloc[rowId, colId] = 0
-    elif AKI_Df['复发恢复'][rowId] == 1:
-        AKI_Df.iloc[rowId, colId] = 1
-    elif AKI_Df['复发未恢复'][rowId] == 1:
-        AKI_Df.iloc[rowId, colId] = 2
-    elif AKI_Df['未恢复'][rowId] == 1:
-        AKI_Df.iloc[rowId, colId] = 3
-
-
 DiagnoseTypes = []
 import re
 pattern = r' |,|\.|/|;|\'|`|\[|\]|<|>|\?|:|"|\{|\}|\~|!|@|#|\$|%|\^|&|\(|\)|-|=|\_|\+|，|。|、|；|‘|（|）'
