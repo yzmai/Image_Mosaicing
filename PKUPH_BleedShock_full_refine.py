@@ -849,17 +849,25 @@ for eachprefix in ['手术名称_', '麻醉方式_', '手术级别_', '手术总
     for eachcolId in colIds:
         allMergedBleedShockDf.iloc[np.where(np.isnan(allMergedBleedShockDf.iloc[:, eachcolId]))[0], eachcolId] = 0
 
+allMergedBleedShockDf.drop(['药物通用名_青霉素皮试液'], axis=1, inplace=True)
+allMergedBleedShockDf['输血浆量(u)'] = allMergedBleedShockDf['输血浆量(ml)']/200
+allMergedBleedShockDf['总输血量(u)'] = allMergedBleedShockDf['输浓缩红细胞量(u)'] + allMergedBleedShockDf['输血浆量(ml)']/200
+
 allMergedBleedShockDf.to_csv(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_分类.csv', encoding="UTF-8", na_rep='', index=False)
 allMergedBleedShockDf.to_excel(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_分类.xlsx', encoding="UTF-8", na_rep='', index=False)
+
 
 allMergedBleedShockDf_outcome = allMergedBleedShockDf.iloc[[rowId for rowId in range(len((allMergedBleedShockDf))) if allMergedBleedShockDf['出院转归'].iloc[rowId] is not np.nan], :]
 allMergedBleedShockDf_outcome['出院转归'].astype(np.int)
 allMergedBleedShockDf_outcome.to_csv(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_二分类.csv', encoding="UTF-8", na_rep='', index=False)
 allMergedBleedShockDf_outcome.to_excel(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_二分类.xlsx', encoding="UTF-8", na_rep='', index=False)
-
+Count_zhuangui = pd.Series(allMergedBleedShockDf_outcome['出院转归']).value_counts()
 
 allMergedBleedShockDf_recovery = allMergedBleedShockDf_outcome[allMergedBleedShockDf_outcome['出院转归'] == 0]
-allMergedBleedShockDf_recovery.to_csv(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_医嘱离转院住院时间.csv', encoding="UTF-8", na_rep="", index=False)
-allMergedBleedShockDf_recovery.to_excel(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_医嘱离转院住院时间.xlsx', encoding="UTF-8", na_rep="", index=False)
+allMergedBleedShockDf_recovery.to_csv(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_医嘱离转院输血量.csv', encoding="UTF-8", na_rep="", index=False)
+allMergedBleedShockDf_recovery.to_excel(r'D:\Ynby\Doc\Demo/出血性休克院前+院后数据_清洗干净_医嘱离转院输血量.xlsx', encoding="UTF-8", na_rep="", index=False)
+std_nongsuohongxibao = pd.Series(allMergedBleedShockDf_recovery['输浓缩红细胞量(u)']).std
+std_shuxuejiang = pd.Series(allMergedBleedShockDf_recovery['输血浆量(u)']).std
+std_zongshuxue = pd.Series(allMergedBleedShockDf_recovery['总输血量(u)']).std
 
 

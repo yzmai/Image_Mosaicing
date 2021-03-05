@@ -116,6 +116,7 @@ def get_trend_seasonal_residual(colname):
     return trend, seasonal, residual
 
 
+
 if __name__ == "__main__":
 
     yearmonthlyData = pd.read_excel(r'D:\Ynby\Doc\Demo/住院数据_入院年月统计.xlsx', encoding="UTF-8", na_rep="", index=True)
@@ -134,6 +135,16 @@ if __name__ == "__main__":
     draw_acf_pacf(residual)
 
     ts = yearmonthlyData['死亡率']
+    draw_trend(ts, 12)
+    teststationarity(ts)
+
+    trend, seasonal, residual = decompose(ts)
+    residual.dropna(inplace=True)
+    draw_trend(residual, 12)
+    teststationarity(residual)
+    draw_acf_pacf(residual)
+
+    ts = yearmonthlyData['患者编号']
     draw_trend(ts, 12)
     teststationarity(ts)
 

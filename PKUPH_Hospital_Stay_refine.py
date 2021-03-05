@@ -327,11 +327,14 @@ death_month_ztest_p.to_excel(r'D:\Ynby\Doc\Demo/住院数据_死亡率_按自然
 #去除趋势月份变化
 trend_stayday, seasonal, residual = PKUPH_tsr.get_trend_seasonal_residual('住院天数')
 trend_death, seasonal, residual = PKUPH_tsr.get_trend_seasonal_residual('死亡率')
+trend_patientnum, seasonal, residual = PKUPH_tsr.get_trend_seasonal_residual('患者编号')
 allMergedSheet['入院Date'] = allMergedSheet['入院Date'].astype('str')
 trend_stayday = trend_stayday.reset_index()
 trend_stayday.rename(columns={'入院年月': '入院年月月初', '住院天数': '住院天数趋势'}, inplace=True)
 trend_death = trend_death.reset_index()
 trend_death.rename(columns={'入院年月': '入院年月月初', '住院天数': '死亡率趋势'}, inplace=True)
+trend_patientnum = trend_patientnum.reset_index()
+trend_patientnum.rename(columns={'入院年月': '入院年月月初', '住院天数': '死亡率趋势'}, inplace=True)
 
 allMergedSheet['入院年月月初'] = [(str(eachint)[0:4] + '-' + str(eachint)[4:6] + '-01') for eachint in allMergedSheet['入院年月'].values]
 

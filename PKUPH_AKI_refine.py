@@ -16,7 +16,7 @@ if sys.getdefaultencoding() != 'utf-8':
     sys.setdefaultencoding('utf-8')
 
 
-AKI_Df=pd.read_excel(r'D:\Ynby\Doc\Demo/AKI数据_Refine_尿量_列名去空格.xlsx')
+AKI_Df=pd.read_excel(r'D:\Ynby\Doc\Demo/AKI数据_Refine_尿量_列名去空格_去掉缺失严重列.xlsx')
 
 #去除重复列
 for colId in range(AKI_Df.shape[1]-1, -1, -1):
@@ -58,15 +58,14 @@ for colId in range(len(AKI_Df.columns)):
 
 shouldBeStrColNames = [eachColName.replace(" ", "") for eachColName in ['分中心单位', '转入科室', 'AKI诊断标准', '入ICU诊断', '手术名称', '手术部位', '1原因', '随访时间（28天）1原因', '随访时间（90天）1原因', '随访时间（1年）1原因']]
 shouldBeIntColNames = [eachColName.replace(" ", "") for eachColName in ['血管活性药（肾上腺素，去甲肾上腺素，多巴胺，垂体后叶素，间羟胺）', '氨基糖苷类（庆大霉素，阿米卡星，依替米星，奈替米星）', \
-                       '急诊手术', '术中出血（ml）', '术中低血压（有无）', '总入量（ml）', '总出量（ml）', '0.9%氯化钠，乳酸钠林格氏液，醋酸钠林格氏液（ml）', '羟乙基淀粉，明胶，右旋糖酐（ml）',  \
-                       '20%白蛋白（ml）', '红细胞（ml）', '血浆（ml）', '血小板（ml）', '入ICU前/基线-肾替代治疗（1/0）', '入ICU前/基线-1（1/0）','入ICU第1天（即刻）-肾替代治疗（1/0）',  \
+                        '入ICU前/基线-肾替代治疗（1/0）', '入ICU前/基线-1（1/0）','入ICU第1天（即刻）-肾替代治疗（1/0）',  \
                        '入ICU第1天（即刻）-1（1/0）', '入ICU 第2天-肾替代治疗（1/0）', '入ICU 第3天-肾替代治疗（1/0）', '入ICU第 4天-肾替代治疗（1/0）', '入ICU第 5天-肾替代治疗（1/0）',  '入ICU第 5天-1（1/0）',  \
                        '入ICU第6天-肾替代治疗（1/0）', '入ICU 第7天-肾替代治疗（1/0）', '入ICU第14天-肾替代治疗（1/0）', '入ICU第14天-1（1/0）', '出院前-肾替代治疗（1/0）', '出院前-1（1/0）', \
                        '出院转归', 'ICU住院时间(天)', '住院时间（天）']]
 
 shouldBeFloatColNames = [eachColName.replace(" ", "") for eachColName in ['身高', '体重', 'P02/Fi02', '乳酸(mmol/L)', '血红蛋白（g/L）', 'ALT(U/L)', 'AST(U/L)', '总蛋白(g/L)', '白蛋白（g/L）', '总胆红素(μmol/L)', '直接胆红素(μmol/L)', \
                          '钾(mmol/L)', '钠(mmol/L)', '氯(mmol/L)', 'D-Dimer(ng/ml)', '肌钙蛋白（TNI）（ng/ml）', 'B型脑钠肽（BNP）（pg/ml）', '降钙素原（ng/ml）',  \
-                         'C-反应蛋白（mg/L）', '手术时间（h）',
+                         'C-反应蛋白（mg/L）'
                          ] + [str for str in AKI_Df.columns.values if str.find('24小时尿量') > 0]   \
                          + [str for str in AKI_Df.columns.values if str.find('血肌酐') > 0]   \
                          ]
@@ -133,12 +132,11 @@ shouldBeDateColNames = [eachColName.replace(" ", "") for eachColName in ['入ICU
 # AKI_Df.to_csv(r'D:\Ynby\Doc\Demo/AKI数据_清洗干净.csv', encoding="UTF-8", na_rep="")
 # AKI_Df.to_excel(r'D:\Ynby\Doc\Demo/AKI数据_清洗干净.xlsx', encoding="UTF-8", na_rep="")
 
-#分类型变量数字化
 
 #入ICU第1~7天（即刻）-肾替代治疗（1/0）， 合并为1列，只要有1个1，就是1
 allTouxiColumns = [str for str in AKI_Df.columns.values if str.find('肾替代治疗') > 0 ]
-AKI_Df['肾替代治疗（1/0）'] = np.nan
-colId = np.where(AKI_Df.columns == '肾替代治疗（1/0）')[0][0]
+AKI_Df['是否肾替代治疗'] = np.nan
+colId = np.where(AKI_Df.columns == '是否肾替代治疗')[0][0]
 for rowId in range(len(AKI_Df)):
     for eachcolId in allTouxiColumns:
         found = False
@@ -153,6 +151,8 @@ for rowId in range(len(AKI_Df)):
     if found == True:
         AKI_Df.iloc[rowId, colId] = flagvalue
 
+
+#分类型变量数字化
 
 DiagnoseTypes = []
 import re
@@ -203,11 +203,31 @@ for rowId in range(len(AKI_Df)):
     elif AKI_Df['未恢复'][rowId] == 1:
         AKI_Df.iloc[rowId, colId] = 1
 
+AKI_Df.drop(['降钙素原（ng/ml）', 'C-反应蛋白（mg/L）', '身高', '体重',
+            '1原因', 'ICU住院时间(天)',
+             '入ICU诊断', 'AKI诊断标准'], axis=1, inplace=True)
+for eachcolname in AKI_Df.columns.values:
+    if eachcolname.find('尿量') >= 0 :
+        AKI_Df.drop(eachcolname, axis=1, inplace=True)
+    elif eachcolname.find('肾替代治疗（1/0）') >= 0 :
+        AKI_Df.drop(eachcolname, axis=1, inplace=True)
+    elif eachcolname.find('出院前') >= 0 :
+        AKI_Df.drop(eachcolname, axis=1, inplace=True)
+    elif eachcolname.find('随访') >= 0 :
+        AKI_Df.drop(eachcolname, axis=1, inplace=True)
+
+AKI_Df.drop(['入ICU前/基线-1（1/0）', '入ICU第1天（即刻）-1（1/0）', '入ICU第2天-1（1/0）', '入ICU第3天-1（1/0）', '入ICU第4天-1（1/0）',  \
+                            '入ICU第5天-1（1/0）', '入ICU第6天-1（1/0）', '入ICU第7天-1（1/0）', '入ICU第14天-1（1/0）'], axis=1, inplace=True)
+AKI_Df.drop(['入ICU第14天-血肌酐（μmol/L）'], axis=1, inplace=True)
+
+for eachprefix in ['是否肾替代治疗']:
+    colIds = [id for id in range(len(AKI_Df.columns)) if AKI_Df.columns[id].find(eachprefix) >= 0]
+    for eachcolId in colIds:
+        AKI_Df.iloc[np.where(np.isnan(AKI_Df.iloc[:, eachcolId]))[0], eachcolId] = 0
+
 
 AKI_Df.to_csv(r'D:\Ynby\Doc\Demo/AKI数据_已清洗_二分类.csv', encoding="UTF-8", na_rep="", index=False)
 AKI_Df.to_excel(r'D:\Ynby\Doc\Demo/AKI数据_已清洗_二分类.xlsx', encoding="UTF-8", na_rep="", index=False)
-
-AKI_Df['入ICU第7天-24小时尿量（ml）'].astype('float64')
 
 AKI_Df_recovery = AKI_Df[np.isnan(AKI_Df['逆转时间']) == False]
 AKI_Df_recovery.to_csv(r'D:\Ynby\Doc\Demo/AKI数据_已清洗_恢复时间.csv', encoding="UTF-8", na_rep="", index=False)
