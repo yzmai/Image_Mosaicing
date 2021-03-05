@@ -162,3 +162,49 @@ plt.plot(y, label='History')
 plt.plot(results.forecast(12), label='SARIMA')
 plt.legend(loc='best')
 plt.show()
+
+
+
+#
+#
+# y = yearmonthlyData['住院人数'].iloc[:-12]
+# warnings.filterwarnings("ignore") # specify to ignore warning messages
+#
+# AICDf = []
+# for param in pdq:
+#     for param_seasonal in seasonal_pdq:
+#         try:
+#             mod = sm.tsa.statespace.SARIMAX(y,
+#                                             order=param,
+#                                             seasonal_order=param_seasonal,
+#                                             enforce_stationarity=False,
+#                                             enforce_invertibility=False)
+#
+#             results = mod.fit()
+#
+#             print('ARIMA{}x{}12 - AIC:{}'.format(param, param_seasonal, results.aic))
+#             if len(AICDf) == 0:
+#                 AICDf = pd.DataFrame([str(param), str(param_seasonal), results.aic]).transpose()
+#             else:
+#                 AICDf = pd.concat([AICDf, pd.DataFrame([str(param), str(param_seasonal), results.aic]).transpose()], axis=0)
+#         except:
+#             continue
+#
+# AICDf.columns = ['param', 'param_seasonal', 'AIC']
+# AICDf.sort_values(by='AIC', ascending=False, inplace=True)
+# AICDf.head(1)
+#
+# mod = sm.tsa.statespace.SARIMAX(y,
+#                                 order=(0, 0, 1),
+#                                 seasonal_order=(0, 0, 1, 12),
+#                                 enforce_stationarity=False,
+#                                 enforce_invertibility=False)
+#
+# results = mod.fit()
+# plt.figure(figsize=(16, 8))
+# plt.title('住院人数', fontproperties=zhfont1)
+# plt.plot(y, label='History')
+# plt.plot(results.forecast(12), label='SARIMA')
+# plt.legend(loc='best')
+# plt.show()
+
