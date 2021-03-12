@@ -118,6 +118,7 @@ for filename in hospital_in_list:
 yearmonthlyMergedSheet = allMergedSheet.groupby('入院年月').agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
 yearmonthlyMergedSheet['死亡率'] = yearmonthlyMergedSheet['是否死亡'] / yearmonthlyMergedSheet['患者编号']
 yearmonthlyMergedSheet.to_excel(r'D:\Ynby\Doc\Demo/住院数据_入院年月统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+yearmonthlyMergedSheet.to_csv(r'D:\Ynby\Doc\Demo/住院数据_入院年月统计.csv', encoding="UTF-8", na_rep="", index=True)
 
 
 fig, ax = plt.subplots()

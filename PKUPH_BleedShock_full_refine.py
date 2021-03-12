@@ -758,11 +758,22 @@ sheet_qitayaowu.to_excel(r'D:\Ynby\Doc\Demo/sheet_qitayaowu.xlsx', encoding="UTF
 
 #Sheet 14
 sheet_tiwenjilu = pd.read_excel(os.path.join(parent_folder, filename), sheetname=b.sheets()[13].name)
-colIds = [4, 5, 6, 7, 9, 10, 11]
-sheet_tiwenjilu = sheet_tiwenjilu.iloc[:, colIds].groupby(sheet_tiwenjilu['病史ID']).apply(np.mean, axis=0)
-sheet_tiwenjilu.reset_index(drop=False, inplace=True)
+colIds = [0, 6, 7, 9, 10, 11]
 
-allMergedBleedShockDf = pd.merge(allMergedBleedShockDf, sheet_tiwenjilu, on ='病史ID', how='left')
+sheet_tiwenjilu_earlytimestamp = sheet_tiwenjilu.iloc[:, 1:2].groupby(sheet_tiwenjilu['病史ID']).apply(np.min, axis=0)
+sheet_tiwenjilu_earlytimestamp.rename(columns={'记录时间':'最早记录时间'}, inplace=True)
+sheet_tiwenjilu_earlytimestamp.reset_index(drop=False, inplace=True)
+all_sheet_tiwenjilu = pd.merge(sheet_tiwenjilu, sheet_tiwenjilu_earlytimestamp, on='病史ID')
+all_sheet_tiwenjilu_early3day = all_sheet_tiwenjilu.iloc[[rowId for rowId in range(len(all_sheet_tiwenjilu)) if datetime.datetime.strptime(all_sheet_tiwenjilu['记录时间'].iloc[rowId], "%Y-%m-%d %H:%M:%S") < datetime.datetime.strptime(all_sheet_tiwenjilu['最早记录时间'].iloc[rowId], "%Y-%m-%d %H:%M:%S")+datetime.timedelta(3)], :]
+all_sheet_tiwenjilu_early3day_min = all_sheet_tiwenjilu_early3day.iloc[:, colIds].groupby(all_sheet_tiwenjilu_early3day['病史ID']).apply(np.min, axis=0)
+all_sheet_tiwenjilu_early3day_max = all_sheet_tiwenjilu_early3day.iloc[:, colIds].groupby(all_sheet_tiwenjilu_early3day['病史ID']).apply(np.max, axis=0)
+all_sheet_tiwenjilu_early3day_min.reset_index(drop=True, inplace=True)
+all_sheet_tiwenjilu_early3day_max.reset_index(drop=True, inplace=True)
+all_sheet_tiwenjilu_early3day_max.rename(columns={'收缩压(mmHg)':'收缩压(mmHg)_最高', '舒张压(mmHg)':'舒张压(mmHg)_最高', '体温(℃)':'体温(℃)_最高', '脉搏(次)':'脉搏(次)_最高', '呼吸(次/分)':'呼吸(次/分)_最高'}, inplace=True)
+all_sheet_tiwenjilu_early3day_min.rename(columns={'收缩压(mmHg)':'收缩压(mmHg)_最低', '舒张压(mmHg)':'舒张压(mmHg)_最低', '体温(℃)':'体温(℃)_最低', '脉搏(次)':'脉搏(次)_最低', '呼吸(次/分)':'呼吸(次/分)_最低'}, inplace=True)
+
+allMergedBleedShockDf = pd.merge(allMergedBleedShockDf, all_sheet_tiwenjilu_early3day_max, on ='病史ID', how='left')
+allMergedBleedShockDf = pd.merge(allMergedBleedShockDf, all_sheet_tiwenjilu_early3day_min, on ='病史ID', how='left')
 
 #Sheet 15
 sheet_xuetangjilu = pd.read_excel(os.path.join(parent_folder, filename), sheetname=b.sheets()[14].name)
@@ -840,7 +851,7 @@ sheet_xinzangzhibiao.reset_index(drop=False, inplace=True)
 
 allMergedBleedShockDf = pd.merge(allMergedBleedShockDf, sheet_xinzangzhibiao, on ='病史ID', how='left')
 
-allMergedBleedShockDf.drop(['既往合并症', '其他止血药物', '尿量', '伤口引流量(ml)', '血糖(mmol/L)_y'], axis=1, inplace=True)
+allMergedBleedShockDf.drop(['既往合并症', '其他止血药物', '血糖(mmol/L)_y'], axis=1, inplace=True)
 # allMergedBleedShockDf.drop(['入ICU前/基线-1（1/0）', '入ICU第1天（即刻）-1（1/0）', '入ICU第2天-1（1/0）', '入ICU第3天-1（1/0）', '入ICU第4天-1（1/0）',  \
 #                             '入ICU第5天-1（1/0）', '入ICU第6天-1（1/0）', '入ICU第7天-1（1/0）', '入ICU第14天-1（1/0）', '出院前-1（1/0）'], axis=1, inplace=True)
 
