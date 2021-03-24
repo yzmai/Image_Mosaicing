@@ -107,15 +107,15 @@ def draw_acf_pacf(ts, lags=31):
     plot_pacf(ts, lags=31, ax=ax2)
     plt.show()
 
-def get_trend_seasonal_residual(colname):
-    yearmonthlyData = pd.read_excel(parent_folder + r'/超声刀实验数据9-27_OnlyData.xlsx', encoding="UTF-8", na_rep="", index=True)
-
-    yearmonthlyData['入院年月'] = [(str(eachstr)[0:4] + "-" + str(eachstr)[4:]) for eachstr in yearmonthlyData['入院年月'].values]
-    yearmonthlyData.index = pd.to_datetime(yearmonthlyData['入院年月'])
-
-    ts = yearmonthlyData[colname]
-    trend, seasonal, residual = decompose(ts)
-    return trend, seasonal, residual
+# def get_trend_seasonal_residual(colname):
+#     yearmonthlyData = pd.read_excel(parent_folder + r'/超声刀实验数据9-27_OnlyData.xlsx', encoding="UTF-8", na_rep="", index=True)
+#
+#     yearmonthlyData['入院年月'] = [(str(eachstr)[0:4] + "-" + str(eachstr)[4:]) for eachstr in yearmonthlyData['入院年月'].values]
+#     yearmonthlyData.index = pd.to_datetime(yearmonthlyData['入院年月'])
+#
+#     ts = yearmonthlyData[colname]
+#     trend, seasonal, residual = decompose(ts)
+#     return trend, seasonal, residual
 
 
 

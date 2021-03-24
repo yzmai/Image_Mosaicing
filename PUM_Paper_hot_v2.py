@@ -38,6 +38,8 @@ from wordcloud import WordCloud
 # EI ： 电子期刊的ISSN（eISSN）
 # UT： 入藏号（Accession Number）
 
+# https://blog.csdn.net/weixin_37773766/article/details/80925645
+
 zhfont1 = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=20)
 
 if sys.getdefaultencoding() != 'utf-8':
@@ -47,8 +49,6 @@ if sys.getdefaultencoding() != 'utf-8':
 # https://chenzhen.blog.csdn.net/article/details/103378351?utm_term=z%E6%A3%80%E9%AA%8C&utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduweb~default-1-103378351&spm=3001.4430
 
 parent_folder = r'D:\Ynby\Doc\协和Demo'
-hospital_in_list = os.listdir(parent_folder)
-# calendarData = calendar.get_all_calendar()
 
 allwebofscienceMap = pd.read_excel(r'D:\Ynby\Doc\协和Demo/webofscience字段映射.xlsx', encoding='UTF-8')
 webofscienceMap = pd.read_excel(r'D:\Ynby\Doc\协和Demo/webofscience字段映射_concerned.xlsx', encoding='UTF-8')
