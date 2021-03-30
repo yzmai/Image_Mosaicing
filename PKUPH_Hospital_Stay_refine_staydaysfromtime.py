@@ -29,7 +29,7 @@ if sys.getdefaultencoding() != 'utf-8':
 # https://chenzhen.blog.csdn.net/article/details/103378351?utm_term=z%E6%A3%80%E9%AA%8C&utm_medium=distribute.pc_aggpage_search_result.none-task-blog-2~all~sobaiduweb~default-1-103378351&spm=3001.4430
 
 parent_folder = r'D:\Ynby\Doc\Demo\王储final'
-outfolder = r'D:\Ynby\Doc\Demo\按出院时间维度_出入院时间'
+outfolder = r'D:\Ynby\Doc\Demo\按入院时间维度_出入院时间'
 hospital_in_list = os.listdir(parent_folder)
 # calendarData = calendar.get_all_calendar()
 
@@ -125,6 +125,13 @@ yearmonthlyMergedSheet = allMergedSheet.groupby('入院年月').agg({'患者编�
 yearmonthlyMergedSheet['死亡率'] = yearmonthlyMergedSheet['是否死亡'] / yearmonthlyMergedSheet['患者编号']
 yearmonthlyMergedSheet.to_excel(outfolder+r'/住院数据_入院年月统计_出入院时间.xlsx', encoding="UTF-8", na_rep="", index=True)
 yearmonthlyMergedSheet.to_csv(outfolder+r'/住院数据_入院年月统计_出入院时间.csv', encoding="UTF-8", na_rep="", index=True)
+
+
+deptyearmonthlyMergedSheet = allMergedSheet.groupby(('入院（就诊）科室名称', '入院年月')).agg({'患者编号':'count','是否死亡':'sum', '住院天数':'mean'})
+deptyearmonthlyMergedSheet['死亡率'] = deptyearmonthlyMergedSheet['是否死亡'] / deptyearmonthlyMergedSheet['患者编号']
+deptyearmonthlyMergedSheet = deptyearmonthlyMergedSheet.sort_values(by='死亡率', ascending=False)
+deptyearmonthlyMergedSheet.reset_index(inplace=True)
+deptyearmonthlyMergedSheet.to_excel(outfolder+r'/住院数据_科室入院年月统计.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 
 fig, ax = plt.subplots()
