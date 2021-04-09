@@ -21,6 +21,8 @@ from matplotlib import font_manager
 import PKUPH_trend_seasonal_residual as PKUPH_tsr
 from wordcloud import WordCloud
 
+# https://blog.csdn.net/Bill_zhang5/article/details/80228441
+
 zhfont1 = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=40)
 zhfontsmall = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=12)
 zhfontmiddle = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=25)

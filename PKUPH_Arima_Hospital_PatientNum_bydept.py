@@ -261,14 +261,14 @@ Covid19_realandforecastDeptData = realandforecastDeptData[realandforecastDeptDat
 Covid19_realandforecastDeptData = Covid19_realandforecastDeptData.groupby(('入院（就诊）科室名称')).agg({'入院人数':'sum', '实际入院人数':'sum'})
 Covid19_realandforecastDeptData['实际预测比'] = Covid19_realandforecastDeptData['实际入院人数'] /  Covid19_realandforecastDeptData['入院人数']
 Covid19_realandforecastDeptData.sort_values(by='实际预测比', ascending=True, inplace=True)
-Covid19_realandforecastDeptData.to_excel(outfolder+r'/实际住院数据_2021年2月新冠爆发后_科室入院人数统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+Covid19_realandforecastDeptData.to_excel(outfolder+r'/实际住院数据_2020年2月新冠爆发后_科室入院人数统计.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 
 Covid19_realandforecastinoutDeptData = realandforecastinoutDeptData[realandforecastinoutDeptData.index >= '2020-02-01']
 Covid19_realandforecastinoutDeptData = Covid19_realandforecastinoutDeptData.groupby(('科室')).agg({'入院人数':'sum', '实际入院人数':'sum'})
 Covid19_realandforecastinoutDeptData['实际预测比'] = Covid19_realandforecastinoutDeptData['实际入院人数'] /  Covid19_realandforecastinoutDeptData['入院人数']
 Covid19_realandforecastinoutDeptData.sort_values(by='实际预测比', ascending=True, inplace=True)
-Covid19_realandforecastinoutDeptData.to_excel(outfolder+r'/实际住院数据_2021年2月新冠爆发后_科室分类_入院人数统计.xlsx', encoding="UTF-8", na_rep="", index=True)
+Covid19_realandforecastinoutDeptData.to_excel(outfolder+r'/实际住院数据_2020年2月新冠爆发后_科室分类_入院人数统计.xlsx', encoding="UTF-8", na_rep="", index=True)
 
 Covid19_realandforecastDeptData.reset_index(inplace=True)
 Covid19_realandforecastinoutDeptData.reset_index(inplace=True)
@@ -281,7 +281,7 @@ plt.bar(list(range(len(Covid19_realandforecastDeptData))), Covid19_realandforeca
 plt.margins(0.01)
 plt.ylabel("实际与预测入院人数比", fontproperties=zhfontlabel)
 plt.xticks(list(range(len(Covid19_realandforecastDeptData))),tuple([eachstr.replace('病房','') for eachstr in Covid19_realandforecastDeptData['入院（就诊）科室名称'].values.tolist()]), fontproperties=zhfontsmall, rotation=270)
-plt.savefig(outfolder + r'/住院数据_住院人数_2021年2月新冠爆发后_实际与预测比率_科室排序.jpg')
+plt.savefig(outfolder + r'/住院数据_住院人数_2020年2月新冠爆发后_实际与预测比率_科室排序.jpg')
 plt.show()
 
 
@@ -293,7 +293,7 @@ plt.bar(list(range(len(Covid19_realandforecastinoutDeptData))), Covid19_realandf
 plt.margins(0.01)
 plt.ylabel("实际与预测入院人数比", fontproperties=zhfontmiddle)
 plt.xticks(list(range(len(Covid19_realandforecastinoutDeptData))),tuple([eachstr.replace('病房','') for eachstr in Covid19_realandforecastinoutDeptData['科室'].values.tolist()]), fontproperties=zhfontmiddle, rotation=270)
-plt.savefig(outfolder + r'/住院数据_住院人数_2021年2月新冠爆发后_实际与预测比率_科室分类排序.jpg')
+plt.savefig(outfolder + r'/住院数据_住院人数_2020年2月新冠爆发后_实际与预测比率_科室分类排序.jpg')
 plt.show()
 
 

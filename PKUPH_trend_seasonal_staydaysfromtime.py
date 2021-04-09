@@ -34,7 +34,7 @@ from statsmodels.tsa.stattools import adfuller
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 
 zhfont1 = font_manager.FontProperties(fname='C:\Windows\Fonts\simkai.ttf',size=20)
-outfolder = r'D:\Ynby\Doc\Demo\按出院时间维度_出入院时间'
+outfolder = r'D:\Ynby\Doc\Demo\按入院时间维度_出入院时间'
 
 # 移动平均图
 def draw_trend(timeseries, size):

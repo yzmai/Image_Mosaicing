@@ -3,7 +3,7 @@ from match_features import *
 from scipy import optimize
 from optimize_fcn import *
 import re
-
+import pandas as pd
 
 class GenerateMosaic:
 
@@ -35,6 +35,10 @@ class GenerateMosaic:
             # Get SIFT descriptors
             siftmatch_obj = SiftMatching(img_1_path, img_2_path, results_fldr='', nfeatures=2000, gamma=0.6)
             correspondence = siftmatch_obj.run()
+            print("len(correspondence) : " + str(len(correspondence)))
+            print("correspondence[0] : " + str(correspondence[0]))
+            correspondence2 = pd.DataFrame(correspondence)
+            correspondence2.to_csv("correspondence.csv")
 
             # Run RANSAC to remove outliers
             ransac_obj = RANSAC()
@@ -230,6 +234,8 @@ if __name__ == "__main__":
     for imageId in range(len(img_name_list)):
         image_ids = image_ids + [int(s) for s in re.findall(r'\d+', img_name_list[imageId])]
     img_name_list = [img_name_list[id] for id in np.argsort(image_ids).tolist()]
+
+    img_name_list = ['mouth_418.jpg', 'mouth_424.jpg']
 
     obj = GenerateMosaic(parent_folder=parent_folder , img_name_list=img_name_list)
     obj.mosaic()
