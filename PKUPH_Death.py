@@ -286,7 +286,7 @@ if __name__ == '__main__':
             goodRowIds = goodRowIds + [rowId]
     df_lift = df_lift.iloc[goodRowIds, :]
 
-    df_lift.rename(columns={'item1':'先验', 'item2':'后验', 'instance':'样本数量', 'support':'支持度', 'confidence':'置信度', 'lift':'提升度'}, inplace=True)  # 创建频繁规则数据框
+    df_lift.rename(columns={'item1':'先验', 'item2':'后验', 'instance':'支持度计数', 'support':'支持度', 'confidence':'置信度', 'lift':'提升度'}, inplace=True)  # 创建频繁规则数据框
     df_lift.sort_values('置信度', ascending=False, inplace=True)
     df_lift.to_csv(r'D:\Ynby\Doc\Demo/死亡原因_关联规则.csv', encoding="UTF-8", na_rep="", index=False)
     df_lift.to_excel(r'D:\Ynby\Doc\Demo/死亡原因_关联规则.xlsx', encoding="UTF-8", na_rep="", index=False)
