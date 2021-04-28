@@ -91,6 +91,7 @@ def Text2Class(allDf, colname, useregex=True):
 
 bicong_parent_folder = r'D:\Ynby\Doc\Demo\臂丛\臂丛/'
 bicong_personData = pd.read_excel(bicong_parent_folder + '1.患者基本信息.xlsx', encoding="UTF-8", na_rep="", index=True)
+bicong_personData.index = list(range(len(bicong_personData)))
 bicong_personData_duplicated = bicong_personData.loc[:, ['患者编号']].duplicated()
 duplicatedIndex = bicong_personData_duplicated[bicong_personData_duplicated == True].index.values
 bicong_personData_duplicated = bicong_personData.loc[:, ['患者编号']].iloc[list(duplicatedIndex), :].drop_duplicates()
@@ -103,6 +104,7 @@ bicong_personData_duplicated.to_excel(r'D:\Ynby\Doc\Demo/臂丛/1.患者基本�
 
 
 bicong_jiuzhenData = pd.read_excel(bicong_parent_folder + '2.就诊基本信息.xlsx', encoding="UTF-8", na_rep="", index=True)
+bicong_jiuzhenData.index = list(range(len(bicong_jiuzhenData)))
 bicong_jiuzhenData_duplicated = bicong_jiuzhenData.loc[:, ['患者编号', '就诊次数']].duplicated()
 duplicatedIndex = bicong_jiuzhenData_duplicated[bicong_jiuzhenData_duplicated == True].index.values
 bicong_jiuzhenData_duplicated = bicong_jiuzhenData.loc[:, ['患者编号', '就诊次数']].iloc[list(duplicatedIndex), :]
@@ -112,6 +114,7 @@ bicong_jiuzhenData_unique = bicong_jiuzhenData.iloc[[rowId for rowId in range(le
 bicong_Data = pd.merge(bicong_personData, bicong_jiuzhenData_unique.iloc[:, list(range(2)) + list(range(3, len(bicong_jiuzhenData_unique.columns)))], on=('患者编号', '就诊次数'))
 
 bicong_BingShiData = pd.read_excel(bicong_parent_folder + '3.病史.xlsx', encoding="UTF-8", na_rep="", index=True)
+bicong_BingShiData.index = list(range(len(bicong_BingShiData)))
 bicong_BingshiData_duplicated = bicong_BingShiData.loc[:, ['患者编号', '就诊次数']].duplicated()
 duplicatedIndex = bicong_BingshiData_duplicated[bicong_BingshiData_duplicated == True].index.values
 bicong_BingshiData_duplicated = bicong_BingShiData.loc[:, ['患者编号', '就诊次数']].iloc[list(duplicatedIndex), :]
@@ -123,6 +126,7 @@ bicong_Data = pd.merge(bicong_Data, bicong_BingshiData_unique, on=('患者编号
 
 
 bicong_zhenduanData = pd.read_excel(bicong_parent_folder + '4.诊断.xlsx', encoding="UTF-8", na_rep="", index=True)
+bicong_zhenduanData.index = list(range(len(bicong_zhenduanData)))
 bicong_zhenduanData_duplicated = bicong_zhenduanData.loc[:, ['患者编号', '就诊次数']].duplicated()
 duplicatedIndex = bicong_zhenduanData_duplicated[bicong_zhenduanData_duplicated == True].index.values
 bicong_zhenduanData_duplicated = bicong_zhenduanData.loc[:, ['患者编号', '就诊次数']].iloc[list(duplicatedIndex), :]
@@ -137,6 +141,7 @@ bicong_shengmingtizhengData = pd.read_excel(bicong_parent_folder + '11.生命体
 # bicong_shengmingtizhengData.drop(['患者编号','项目名称'], axis=1, inplace=True)
 # bicong_shengmingtizhengData.reset_index(inplace=True)
 # bicong_shengmingtizhengData.drop(['level_2'], axis=1, inplace=True)
+bicong_shengmingtizhengData.index = list(range(len(bicong_shengmingtizhengData)))
 bicong_shenmingtizhengData_duplicated = bicong_shengmingtizhengData.loc[:, ['患者编号', '就诊次数','项目名称']].duplicated()
 duplicatedIndex = bicong_shenmingtizhengData_duplicated[bicong_shenmingtizhengData_duplicated == True].index.values
 bicong_shenmingtizhengData_duplicated = bicong_shengmingtizhengData.loc[:, ['患者编号', '就诊次数','项目名称']].iloc[list(duplicatedIndex), :].drop_duplicates()
@@ -161,9 +166,11 @@ for rowId in range(len(bicong_ItemData)):
 bicong_Data = pd.merge(bicong_Data, bicong_ItemData, on=('患者编号', '就诊次数'), how='left')
 
 bicong_Data = bicong_Data.sort_values(by='体重', ascending=True)
+bicong_Data.index = list(range(len(bicong_Data)))
 bicong_Data_duplicated = bicong_Data.loc[:, ['患者编号']].duplicated()
 duplicatedIndex = bicong_Data_duplicated[bicong_Data_duplicated == True].index.values
 bicong_Data_unique = bicong_Data.iloc[[rowId for rowId in range(len(bicong_Data)) if rowId not in duplicatedIndex], :]
+bicong_Data_unique = bicong_Data_unique.sort_values(by='就诊时间', ascending=True)
 
 bicong_Data_unique.to_csv(r'D:\Ynby\Doc\Demo/臂丛/臂丛数据.csv', encoding="UTF-8", na_rep="", index=False)
 bicong_Data_unique.to_excel(r'D:\Ynby\Doc\Demo/臂丛/臂丛数据.xlsx', encoding="UTF-8", na_rep="", index=False)
